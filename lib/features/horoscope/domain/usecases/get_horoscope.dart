@@ -5,7 +5,7 @@ import 'package:youapp_tester/features/horoscope/data/datasources/horoscope_data
 
 class GetHoroscope extends UseCase<Horoscope?, DateTime> {
   @override
-  Future<Horoscope?> call(DateTime params) async {
+  Horoscope? call(DateTime params) {
     // Reset hour,min,etc
     params = DateTime(
       2024,

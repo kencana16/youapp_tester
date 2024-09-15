@@ -12,6 +12,7 @@ class HoroscopeData {
   });
 }
 
+// ignore: non_constant_identifier_names
 final List<HoroscopeData> LIST_HOROSCOPE_DATA = [
   HoroscopeData(
     start: DateTime(2024, 3, 21),
@@ -60,6 +61,11 @@ final List<HoroscopeData> LIST_HOROSCOPE_DATA = [
   ),
   HoroscopeData(
     start: DateTime(2024, 12, 22),
+    end: DateTime(2024, 12, 31),
+    horoscope: Horoscope.capricornus,
+  ),
+  HoroscopeData(
+    start: DateTime(2024, 1, 1),
     end: DateTime(2024, 1, 19),
     horoscope: Horoscope.capricornus,
   ),

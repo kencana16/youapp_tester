@@ -5,7 +5,7 @@ import 'package:youapp_tester/features/zodiac/domain/entities/zodiac.dart';
 
 class GetZodiac extends UseCase<Zodiac?, DateTime> {
   @override
-  Future<Zodiac?> call(DateTime params) async {
+  Zodiac? call(DateTime params) {
     // Reset hour,min,etc
     params = DateTime(
       params.year,
@@ -13,12 +13,12 @@ class GetZodiac extends UseCase<Zodiac?, DateTime> {
       params.day,
     );
 
-    return LIST_ZODIAC_DATA
-        .firstWhereOrNull((element) =>
-            (params.isAtSameMomentAs(element.start) ||
-                params.isAfter(element.start)) &&
-            (params.isAtSameMomentAs(element.end) ||
-                params.isBefore(element.end)))
-        ?.zodiac;
+    return LIST_ZODIAC_DATA.firstWhereOrNull((element) {
+      var atSameMomentAs = params.isAtSameMomentAs(element.start);
+      var after = params.isAfter(element.start);
+      var atSameMomentAs2 = params.isAtSameMomentAs(element.end);
+      var before = params.isBefore(element.end);
+      return (atSameMomentAs || after) && (atSameMomentAs2 || before);
+    })?.zodiac;
   }
 }
