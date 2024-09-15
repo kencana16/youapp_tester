@@ -37,26 +37,39 @@ class LoginCubit extends Cubit<LoginState> {
     this.getAccessToken(emitNothingwhenEmpty: true);
   }
 
+  @override
+  void onChange(Change<LoginState> change) {
+    debugPrint("=========================---");
+    debugPrint(change.currentState.toString());
+    debugPrint(change.nextState.toString());
+    debugPrint("=========================---");
+    super.onChange(change);
+  }
+
   Future<void> login({
     required String email,
     required String username,
     required String password,
   }) async {
-    emit(LoginLoading());
-    _postLogin
-        .call(LoginDto(
-      email: email,
-      username: username,
-      password: password,
-    ))
-        .then(
-      (accessToken) async {
-        await saveAccessToken(accessToken);
-      },
-      onError: (e, s) {
-        emit(LoginFailed(e: e));
-      },
-    );
+    try {
+      emit(LoginLoading());
+      _postLogin
+          .call(LoginDto(
+        email: email,
+        username: username,
+        password: password,
+      ))
+          .then(
+        (accessToken) async {
+          await saveAccessToken(accessToken);
+        },
+        onError: (e, s) {
+          emit(LoginFailed(e: e));
+        },
+      );
+    } on Exception catch (e) {
+      emit(LoginFailed(e: e));
+    }
   }
 
   Future<void> register({
@@ -64,70 +77,91 @@ class LoginCubit extends Cubit<LoginState> {
     required String username,
     required String password,
   }) async {
-    emit(LoginLoading());
-    _postRegister
-        .call(RegisterDto(
-      email: email,
-      username: username,
-      password: password,
-    ))
-        .then(
-      (success) async {
-        if (success) {
-          await login(
-            email: email,
-            username: username,
-            password: password,
-          );
-          return;
-        }
+    try {
+      emit(LoginLoading());
+      _postRegister
+          .call(RegisterDto(
+        email: email,
+        username: username,
+        password: password,
+      ))
+          .then(
+        (success) async {
+          if (success) {
+            await login(
+              email: email,
+              username: username,
+              password: password,
+            );
+            return;
+          }
 
-        emit(LoginFailed(e: CustomException("Gagal melakukan pendaftaran")));
-      },
-      onError: (e, s) {
-        emit(LoginFailed(e: e));
-      },
-    );
+          emit(const LoginFailed(
+              e: CustomException("Gagal melakukan pendaftaran")));
+        },
+        onError: (e, s) {
+          emit(LoginFailed(e: e));
+        },
+      );
+    } on Exception catch (e) {
+      emit(LoginFailed(e: e));
+    }
   }
 
   Future<void> getAccessToken({
     bool emitNothingwhenEmpty = false,
-  }) {
-    return _getAccessToken.call(NoParams()).then(
-      (value) {
-        if (value != null) {
-          emit(LoginSuccess(accessToken: value));
-        } else {
-          if (!emitNothingwhenEmpty) {
-            emit(LoginFailed(e: CustomException("Access Token not saved")));
+  }) async {
+    try {
+      await _getAccessToken.call(NoParams()).then(
+        (value) {
+          if (value != null) {
+            emit(LoginSuccess(accessToken: value));
+          } else {
+            if (!emitNothingwhenEmpty) {
+              emit(const LoginFailed(
+                  e: CustomException("Access Token not saved")));
+            }
           }
-        }
-      },
-      onError: (e, s) {
-        debugPrintStack(
-          stackTrace: s,
-          label: e.toString(),
-        );
-      },
-    );
+        },
+        onError: (e, s) {
+          debugPrintStack(
+            stackTrace: s,
+            label: e.toString(),
+          );
+        },
+      );
+    } on Exception catch (e, s) {
+      debugPrintStack(
+        stackTrace: s,
+        label: e.toString(),
+      );
+    }
   }
 
-  Future<void> saveAccessToken(String accessToken) {
-    return _saveAccessToken.call(accessToken).then(
-      (value) async {
-        if (value) {
-          await getAccessToken();
-        } else {
-          emit(LoginFailed(e: CustomException("Access Token fail to save")));
-        }
-      },
-      onError: (e, s) {
-        debugPrintStack(
-          stackTrace: s,
-          label: e.toString(),
-        );
-      },
-    );
+  Future<void> saveAccessToken(String accessToken) async {
+    try {
+      await _saveAccessToken.call(accessToken).then(
+        (value) async {
+          if (value) {
+            await getAccessToken();
+          } else {
+            emit(const LoginFailed(
+                e: CustomException("Access Token fail to save")));
+          }
+        },
+        onError: (e, s) {
+          debugPrintStack(
+            stackTrace: s,
+            label: e.toString(),
+          );
+        },
+      );
+    } on Exception catch (e, s) {
+      debugPrintStack(
+        stackTrace: s,
+        label: e.toString(),
+      );
+    }
   }
 
   Future<void> revokeAccessToken() async {
@@ -135,9 +169,11 @@ class LoginCubit extends Cubit<LoginState> {
       return;
     }
 
-    return _revokeAccessToken.call(NoParams()).then(
+    await _revokeAccessToken.call(NoParams()).then(
       (value) {
-        emit(LoginFailed(e: CustomException("Access Token invalid")));
+        if (value) {
+          emit(const LoginFailed(e: CustomException("Access Token invalid")));
+        }
       },
       onError: (e, s) {
         debugPrintStack(
@@ -148,10 +184,12 @@ class LoginCubit extends Cubit<LoginState> {
     );
   }
 
-  Future<void> logout() {
-    return _revokeAccessToken.call(NoParams()).then(
+  Future<void> logout() async {
+    await _revokeAccessToken.call(NoParams()).then(
       (value) {
-        emit(LoginInitial());
+        if (value) {
+          emit(LoginInitial());
+        }
       },
       onError: (e, s) {
         debugPrintStack(
@@ -162,5 +200,3 @@ class LoginCubit extends Cubit<LoginState> {
     );
   }
 }
-
-

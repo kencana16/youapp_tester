@@ -1,4 +1,3 @@
-
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
@@ -42,50 +41,78 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     ProfileEventChangeToken event,
     Emitter emit,
   ) async {
-    emit(ProfileLoading());
-    await _getProfile.call(event.accessToken).then(
-      (value) {
-        emit(
-          ProfileFound(
-            profile: value,
-          ),
-        );
-      },
-      onError: (e, s) {
-        revokeAccessToken?.call();
-        emit(
-          ProfileError(
-            exception: e,
-          ),
-        );
-      },
-    );
+    try {
+      emit(ProfileLoading());
+      await _getProfile.call(event.accessToken).then(
+        (value) {
+          if (value != null) {
+            emit(
+              ProfileFound(
+                profile: value,
+              ),
+            );
+          } else {
+            revokeAccessToken?.call();
+            emit(
+              ProfileError(
+                exception: CustomException('Profile tidak ditemukan'),
+              ),
+            );
+          }
+        },
+        onError: (e, s) {
+          revokeAccessToken?.call();
+          emit(
+            ProfileError(
+              exception: e,
+            ),
+          );
+        },
+      );
+    } on Exception catch (e) {
+      revokeAccessToken?.call();
+      emit(
+        ProfileError(
+          exception: e,
+        ),
+      );
+    }
   }
 
   Future<void> _updateData(
     ProfileEventUpdateData event,
     Emitter emit,
   ) async {
-    emit(ProfileLoading());
-    await _updateProfile
-        .call(
-      UpdateProfileParam(
-        accessToken: event.accessToken,
-        profile: event.profile,
-      ),
-    )
-        .then(
-      (value) {
-        add(ProfileEventChangeToken(accessToken: event.accessToken));
-      },
-      onError: (e, s) {
-        emit(
-          ProfileError(
-            exception: e,
-          ),
-        );
-      },
-    );
+    try {
+      emit(ProfileLoading());
+      await _updateProfile
+          .call(
+        UpdateProfileParam(
+          accessToken: event.accessToken,
+          profile: event.profile,
+        ),
+      )
+          .then(
+        (value) {
+          add(ProfileEventChangeToken(accessToken: event.accessToken));
+        },
+        onError: (e, s) {
+          if(e is Exception) {
+            emit(
+            ProfileError(
+              exception: e,
+            ),
+          );
+          }
+        },
+      );
+    } on Exception catch (e) {
+      emit(
+        ProfileError(
+          exception: e,
+        ),
+      );
+    }
   }
 
   Future<void> _updateInterests(
@@ -101,7 +128,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
             accessToken: event.accessToken, profile: profile),
       );
     } else {
-      emit(ProfileError(exception: CustomException("User Belum Login")));
+      emit(const ProfileError(exception: CustomException("User Belum Login")));
     }
   }
 }
