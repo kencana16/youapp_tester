@@ -9,7 +9,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:youapp_tester/base/widget/password_form_field.dart';
 import 'package:youapp_tester/features/login/presentation/cubit/login_cubit.dart';
 import 'package:youapp_tester/features/login/presentation/pages/login_page.dart';
-import 'package:youapp_tester/routing/app_router.dart';
 
 class MockLoginCubit extends MockCubit<LoginState> implements LoginCubit {}
 
@@ -49,7 +48,7 @@ void main() {
 
   testWidgets('displays login form initially', (WidgetTester tester) async {
     await tester.pumpWidget(createWidgetUnderTest());
-    await tester.pumpAndSettle(Duration(seconds: 1));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
     var widgets = tester.widgetList(find.byType(Widget));
 
     expect(find.byType(MaterialApp), findsOneWidget);

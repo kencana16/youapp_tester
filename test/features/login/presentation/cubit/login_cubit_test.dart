@@ -292,7 +292,7 @@ void main() {
     },
     act: (cubit) => cubit.logout(),
     expect: () => [
-      LoginSuccess(accessToken: "accessToken"),
+      const LoginSuccess(accessToken: "accessToken"),
     ],
     verify: (_) {
       verify(() => mockGetAccessToken.call(any())).called(1);
@@ -318,7 +318,7 @@ void main() {
     },
     act: (cubit) => cubit.revokeAccessToken(),
     expect: () => [
-      LoginSuccess(accessToken: "accessToken"),
+      const LoginSuccess(accessToken: "accessToken"),
     ],
     verify: (_) {
       verify(() => mockGetAccessToken.call(any())).called(1);

@@ -54,7 +54,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           } else {
             revokeAccessToken?.call();
             emit(
-              ProfileError(
+              const ProfileError(
                 exception: CustomException('Profile tidak ditemukan'),
               ),
             );

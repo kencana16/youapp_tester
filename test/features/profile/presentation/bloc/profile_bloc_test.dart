@@ -16,8 +16,8 @@ class MockGetProfile extends Mock implements GetProfile {}
 class MockUpdateProfile extends Mock implements UpdateProfile {}
 
 void main() {
-  String? _accessTokenState;
-  Profile? _profileState;
+  String? accessTokenState;
+  Profile? profileState;
   late ProfileBloc profileBloc;
   late MockGetProfile mockGetProfile;
   late MockUpdateProfile mockUpdateProfile;
@@ -25,8 +25,8 @@ void main() {
   setUp(() {
     registerFallbackValue(FakeUpdateProfileParam());
 
-    _accessTokenState = null;
-    _profileState = null;
+    accessTokenState = null;
+    profileState = null;
 
     mockGetProfile = MockGetProfile();
     mockUpdateProfile = MockUpdateProfile();
@@ -35,22 +35,22 @@ void main() {
       var positionalArguments = invocation.positionalArguments;
       var param = positionalArguments[0] as UpdateProfileParam?;
       var accessTokenArgument = param?.accessToken;
-      if (accessTokenArgument != _accessTokenState) {
+      if (accessTokenArgument != accessTokenState) {
         return false;
       }
 
       var profileArgument = param?.profile;
-      _profileState = profileArgument;
+      profileState = profileArgument;
       return true;
     });
     when(() => mockGetProfile.call(any())).thenAnswer((invocation) async {
       var positionalArguments = invocation.positionalArguments;
       var accessTokenArgument = positionalArguments[0] as String?;
-      if (accessTokenArgument != _accessTokenState) {
+      if (accessTokenArgument != accessTokenState) {
         return null;
       }
 
-      return _profileState;
+      return profileState;
     });
 
     profileBloc = ProfileBloc(
@@ -85,8 +85,8 @@ void main() {
   blocTest<ProfileBloc, ProfileState>(
     'should emit [ProfileLoading, ProfileFound] when profile is fetched successfully',
     setUp: () {
-      _accessTokenState = accessTokenDefault;
-      _profileState = profileDefault;
+      accessTokenState = accessTokenDefault;
+      profileState = profileDefault;
     },
     build: () {
       return profileBloc;
@@ -122,8 +122,8 @@ void main() {
   blocTest<ProfileBloc, ProfileState>(
     'should emit [ProfileLoading, ProfileFound] when profile is updated successfully',
     setUp: () {
-      _accessTokenState = accessTokenDefault;
-      _profileState = profileDefault;
+      accessTokenState = accessTokenDefault;
+      profileState = profileDefault;
     },
     build: () {
       return profileBloc;
@@ -163,8 +163,8 @@ void main() {
   blocTest<ProfileBloc, ProfileState>(
     'should emit [ProfileLoading, ProfileFound] when interests are updated successfully',
     setUp: () {
-      _accessTokenState = accessTokenDefault;
-      _profileState = profileDefault;
+      accessTokenState = accessTokenDefault;
+      profileState = profileDefault;
     },
     build: () {
       return profileBloc
@@ -188,8 +188,8 @@ void main() {
   blocTest<ProfileBloc, ProfileState>(
     'should emit [ProfileError] when interests update fails',
     setUp: () {
-      _accessTokenState = "asdrasdfe";
-      _profileState = profileDefault;
+      accessTokenState = "asdrasdfe";
+      profileState = profileDefault;
     },
     build: () {
       return profileBloc
@@ -200,7 +200,7 @@ void main() {
     expect: () => [
       isA<ProfileLoading>(),
       isA<ProfileError>(),
-      ProfileError(exception: CustomException("User Belum Login")),
+      const ProfileError(exception: CustomException("User Belum Login")),
     ],
     verify: (_) {
       var a = verify(() => mockGetProfile.call(any())).called(1);
